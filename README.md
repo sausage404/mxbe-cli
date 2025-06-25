@@ -64,3 +64,11 @@ In this package, you can use the following commands:
    - `--behavior` or `-b` - Import a behavior pack project
 
    This command will import a project to the bds server.
+
+4. **Link a project**
+
+   ```bash
+   mxbe link
+   ```
+
+   This command will link a project to the development folder minecraft.
