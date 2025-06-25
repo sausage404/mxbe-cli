@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 import compile from "./cmd/compile";
 import update from "./cmd/update";
 import imported from "./cmd/imported";
+import link from "./cmd/link";
 
 function setupCLI(): void {
     program
@@ -30,10 +31,7 @@ function setupCLI(): void {
         .command("compile")
         .description("Compile the project into a distributable package")
         .option("-e, --rebuild", "Rebuild the project before compiling")
-        .option("-v, --version", "Compile the project with a specific versioning")
         .option("-p --mcpack", "Compress zip file to mcpack")
-        .option("-r, --resource", "Compile a resource pack")
-        .option("-b, --behavior", "Compile a behavior pack")
         .action((options) => {
             console.log("Compiling project...");
 
@@ -84,6 +82,20 @@ function setupCLI(): void {
                 console.error(error);
                 process.exit(1);
             });
+        });
+
+    program
+        .command("link")
+        .description("Link project to your minecraft directory")
+        .action(() => {
+            console.log("Linking project to your minecraft directory...");
+            try {
+                link();
+            } catch (error) {
+                console.error("Failed to link project:");
+                console.error(error);
+                process.exit(1);
+            }
         });
 
     program.parse(process.argv);

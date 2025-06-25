@@ -36,8 +36,6 @@ In this package, you can use the following commands:
 
    - `--original` or `-o` - Cancel rebuild and compile the original project files
 
-   - `--version` or `-v` - Compile the project with a specific version
-
    - `--mcpack` or `-p` - Compile the project as a mcpack
 
    This command will compile your project, creating a zip file containing all necessary files.

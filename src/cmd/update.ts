@@ -69,6 +69,7 @@ export default async () => {
         .map(([name, version]) => `${name}@${version}`).concat(answers.addons)
 
     const projectPath = process.cwd();
+    const behaviorPath = path.join(projectPath, 'behavior');
 
     await fs.writeJson(path.join(projectPath, 'package.json'), {
         name: path.basename(projectPath),
@@ -93,7 +94,7 @@ export default async () => {
 
     }, { spaces: 2 });
 
-    await fs.writeJson(path.join(projectPath, 'manifest.json'), {
+    await fs.writeJson(path.join(behaviorPath, 'manifest.json'), {
         ...manifest,
         header: {
             ...manifest.header,

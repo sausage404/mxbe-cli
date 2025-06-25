@@ -1,62 +1,57 @@
 import fs from 'fs-extra';
 import path from 'path';
 
-export default async (action: boolean) => {
-    const manifest = fs.readJSONSync(path.join(process.cwd(), 'manifest.json'));
-    const worldPath = path.resolve(process.cwd(), '..', '..', 'worlds');
-    const worldFolder = fs
-        .readdirSync(worldPath, { withFileTypes: true })
+export default async (isBehavior: boolean) => {
+    const devPath = process.cwd();
+    const worldsPath = path.resolve(devPath, '..', 'worlds');
+    const fileName = isBehavior ? 'world_behavior_packs.json' : 'world_resource_packs.json';
+
+    const packFolders = fs
+        .readdirSync(devPath, { withFileTypes: true })
+        .filter(entry => entry.isDirectory())
+        .map(entry => entry.name);
+
+    const worldFolders = fs
+        .readdirSync(worldsPath, { withFileTypes: true })
         .filter(folder => folder.isDirectory())
-        .map(folder => folder.name)[0];
-    const files = fs.readdirSync(path.join(worldPath, worldFolder), { withFileTypes: true });
+        .map(folder => folder.name);
 
-    if (action) {
-        const filePack = files.find(file => file.name.startsWith('world_behavior_packs'));
+    for (const worldFolder of worldFolders) {
+        const fullWorldPath = path.join(worldsPath, worldFolder);
+        const filePath = path.join(fullWorldPath, fileName);
 
-        if (!fs.existsSync(path.join(filePack.parentPath)))
-            throw new Error(`File world_behavior_packs.json not found in ${worldPath}/${worldFolder}`);
-
-        const file = fs.readJSONSync(path.join(filePack.parentPath, filePack.name));
-
-        if (file.find(item => item.pack_id === manifest.header.uuid)) {
-            console.error('Behavior pack already exists in world behavior packs!')
-            return;
+        if (!fs.existsSync(filePath)) {
+            console.warn(`${fileName} not found in ${worldFolder}`);
+            continue;
         }
 
-        const json = [
-            ...file,
-            {
+        let worldPackData = fs.readJSONSync(filePath, { throws: false }) ?? [];
+
+        for (const packFolder of packFolders) {
+            const manifestPath = path.join(devPath, packFolder, 'manifest.json');
+            if (!fs.existsSync(manifestPath)) {
+                console.warn(`manifest.json not found in ${packFolder}`);
+                continue;
+            }
+
+            const manifest = fs.readJSONSync(manifestPath) ?? [];
+            const exists = worldPackData.find((item: any) => item.pack_id === manifest.header.uuid);
+
+            if (exists) {
+                console.log(`Already exists: ${manifest.header.name} in ${worldFolder}`);
+                continue;
+            }
+
+            worldPackData.push({
                 pack_id: manifest.header.uuid,
                 version: manifest.header.version
-            }
-        ]
+            });
 
-        fs.writeJSONSync(path.join(filePack.parentPath, filePack.name), json, { spaces: 2 });
-
-        console.log('Behavior pack imported successfully!')
-    } else {
-        const filePack = files.find(file => file.name.startsWith('world_resource_packs'));
-
-        if (!fs.existsSync(path.join(filePack.parentPath)))
-            throw new Error(`File world_resource_packs.json not found in ${worldPath}/${worldFolder}`);
-
-        const file = fs.readJSONSync(path.join(filePack.parentPath, filePack.name));
-
-        if (file.find(item => item.pack_id === manifest.header.uuid)) {
-            console.log('Resource pack already exists in world resource packs!')
-            return;
+            console.log(`Imported ${manifest.header.name} into ${worldFolder}`);
         }
 
-        const json = [
-            ...file,
-            {
-                pack_id: manifest.header.uuid,
-                version: manifest.header.version
-            }
-        ]
-
-        fs.writeJSONSync(path.join(filePack.parentPath, filePack.name), json, { spaces: 2 });
-
-        console.log('Resource pack imported successfully!')
+        fs.writeJSONSync(filePath, worldPackData, { spaces: 2 });
     }
-}
+
+    console.log(`Imported all ${isBehavior ? 'behavior' : 'resource'} packs to all worlds.`);
+};
