@@ -1,6 +1,6 @@
 {
   "name": "@mxbe/cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "This is a CLI tool to make minecraft bedrock extension",
   "main": "dist/index.js",
   "bin": {
