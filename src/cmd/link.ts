@@ -22,11 +22,11 @@ export default async () => {
     const bpDest = path.join(mcDir, process.env.BEHAVIOR_PATH, pkg.name);
     const rpDest = path.join(mcDir, process.env.RESOURCE_PATH, pkg.name);
 
-    if(fs.existsSync(bpDest)) fs.removeSync(bpDest);
-    if(fs.existsSync(rpDest)) fs.removeSync(rpDest);
+    if (fs.existsSync(bpDest)) fs.removeSync(bpDest);
+    if (fs.existsSync(rpDest)) fs.removeSync(rpDest);
 
-    fs.symlinkSync(bpSrc, bpDest, "junction");
-    fs.symlinkSync(rpSrc, rpDest, "junction");
+    if (fs.existsSync(bpSrc)) fs.symlinkSync(bpSrc, bpDest, "junction");
+    if (fs.existsSync(rpSrc)) fs.symlinkSync(rpSrc, rpDest, "junction");
 
     console.log(`Linked ${pkg.name} to ${mcDir}`);
 }
